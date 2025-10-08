@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="205" height="162" viewBox="0 0 205 162">
+
+  <!-- Nền đỏ -->
+  <rect width="205" height="162" fill="red" rx="10" ry="10"></rect>
+
+  <!-- Các ô vuông viền trên -->
+  <g fill="black">
+    <rect x="15" y="10" width="15" height="15"></rect>
+    <rect x="45" y="10" width="15" height="15"></rect>
+    <rect x="75" y="10" width="15" height="15"></rect>
+    <rect x="105" y="10" width="15" height="15"></rect>
+    <rect x="135" y="10" width="15" height="15"></rect>
+    <rect x="165" y="10" width="15" height="15"></rect>
+  </g>
+
+  <!-- Các ô vuông viền dưới -->
+  <g fill="black">
+    <rect x="15" y="137" width="15" height="15"></rect>
+    <rect x="45" y="137" width="15" height="15"></rect>
+    <rect x="75" y="137" width="15" height="15"></rect>
+    <rect x="105" y="137" width="15" height="15"></rect>
+    <rect x="135" y="137" width="15" height="15"></rect>
+    <rect x="165" y="137" width="15" height="15"></rect>
+  </g>
+
+  <!-- Nút play (tam giác đen ở giữa) -->
+  <polygon points="80,40 80,120 145,80" fill="black"></polygon>
+</svg>
