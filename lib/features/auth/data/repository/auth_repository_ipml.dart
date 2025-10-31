@@ -1,6 +1,4 @@
-// Thêm 2 import này
 import 'package:cloud_firestore/cloud_firestore.dart';
-// Sửa lỗi gõ: 'emtities' -> 'entities'
 import '../../domain/emtities/user_entity.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../domain/repositories/auth_repository.dart';

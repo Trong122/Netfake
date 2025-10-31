@@ -5,6 +5,7 @@ import 'package:netfake/features/auth/domain/provider/auth_domain_provider.dart'
 import '../../domain/emtities/user_entity.dart';
 import '../../../../core/data/firebase_providers.dart';
 
+
 class AuthController extends AsyncNotifier<UserEntity?> {
   @override
   FutureOr<UserEntity?> build() async {
@@ -19,75 +20,43 @@ class AuthController extends AsyncNotifier<UserEntity?> {
     return null;
   }
 
-Future<void> signIn(String email, String password) async {
+ Future<void> signIn(String email, String password) async {
   state = const AsyncValue.loading();
   try {
-    // 1. Sign in với FirebaseAuth
-    final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    // 1️⃣ Gọi usecase SignIn (đã xử lý đầy đủ trong Repository)
+    final signInUsecase = ref.read(SignInUsecaseProvider);
+    final userEntity = await signInUsecase(email: email, password: password);
 
-    final currentUser = userCredential.user;
-    if (currentUser == null) throw Exception("Không lấy được user");
-
-    // 2. Load dữ liệu Firestore riêng về role
-    final firestore = ref.read(firestoreProvider);
-    final docSnapshot = await firestore.collection('users').doc(currentUser.uid).get();
-
-    if (!docSnapshot.exists) throw Exception("User document không tồn tại");
-
-    final data = docSnapshot.data()!;
-    final role = data['role'] ?? 'user';
-
-    // 3. Sau khi load xong, set state
-    state = AsyncValue.data(
-      UserEntity(
-        id: currentUser.uid,
-        email: currentUser.email ?? '',
-        displayName: currentUser.displayName ?? '',
-        role: role,
-      ),
-    );
-
-    // print("Role của user: $role"); // debug
-
+    // 2️⃣ Cập nhật state (vì userEntity đã có role + displayName)
+    state = AsyncValue.data(userEntity);
   } on FirebaseAuthException catch (e, s) {
-    state = AsyncValue.error(e.message ?? "Lỗi đăng nhập", s);
+    state = AsyncValue.error(e.message ?? "Lỗi đăng nhập Firebase", s);
   } catch (e, s) {
     state = AsyncValue.error(e.toString(), s);
   }
 }
-
-  Future<void> signUp(String email, String password, String display) async {
-    final signUpUsecase = ref.read(SignUpUseCaseProvider);
-
-    state = const AsyncValue.loading();
-    try {
-      await signUpUsecase(
-        email: email,
-        password: password,
-        displayName: display,
-      );
-
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser != null) {
-        state = AsyncValue.data(
-          UserEntity(
+Future<void> signUp(String email, String password, String displayName) async {
+  state = const AsyncValue.loading();
+  try {
+    await ref.read(SignUpUseCaseProvider)(
+      email: email,
+      password: password,
+      displayName: displayName,
+    );
+    final firebaseAuth = ref.watch(firebaseAuthProvider);
+    final currentUser = firebaseAuth.currentUser;
+    state = currentUser != null
+        ? AsyncValue.data(UserEntity(
             id: currentUser.uid,
             email: currentUser.email ?? '',
             displayName: currentUser.displayName ?? '',
-          ),
-        );
-      } else {
-        state = const AsyncValue.data(null);
-      }
-    } on FirebaseAuthException catch (e, s) {
-      state = AsyncValue.error(e.message ?? "Lỗi đăng ký", s);
-    } catch (e, s) {
-      state = AsyncValue.error("Đã xảy ra lỗi không xác định", s);
-    }
+            role: 'user',
+          ))
+        : const AsyncValue.data(null);
+  } catch (e, s) {
+    state = AsyncValue.error(e.toString(), s);
   }
+}
 
   Future<void> signOut() async {
     final signOutUsecase = ref.read(SignOutUsecaseProvider);

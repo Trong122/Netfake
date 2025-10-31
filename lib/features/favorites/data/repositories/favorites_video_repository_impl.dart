@@ -8,11 +8,17 @@ class FavoritesVideoRepositoryImpl extends FavoritesVideoReporitory {
 
   FavoritesVideoRepositoryImpl(this.remoteDataSource);
 
+  // Future<List<FavoritesVideo>> getAllFavoritesVideo() async {
+  //   final videosMD = await remoteDataSource.getAllVideo();
+  //   return videosMD.map((e) => e.toEntity()).toList();
+  // }
   @override
-  Future<List<FavoritesVideo>> getAllFavoritesVideo() async {
-    final videosMD = await remoteDataSource.getAllVideo();
-    return videosMD.map((e) => e.toEntity()).toList();
-  }
+  Future<List<FavoritesVideo>> getAllFavoritesVideo(String userId) async {
+  final videosMD = await remoteDataSource.getAllVideo(); // Lấy toàn bộ
+  // Lọc theo userId
+  final userFavs = videosMD.where((v) => v.userId == userId).toList();
+  return userFavs.map((e) => e.toEntity()).toList();
+}
   Future<List<FavoritesVideo>> getAllVideo(String userId) async {
   final videosMD = await remoteDataSource.getAllVideo(); // Lấy toàn bộ
   // Lọc theo userId
@@ -45,7 +51,7 @@ class FavoritesVideoRepositoryImpl extends FavoritesVideoReporitory {
   }
    @override
   Future<bool> isFavorite(String userId, String videoId) async {
-    final favs = await getAllVideo(videoId);
+    final favs = await getAllVideo(userId);
     return favs.any((fav) => fav.video.id == videoId);
   }
 }

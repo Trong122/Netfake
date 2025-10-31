@@ -6,7 +6,6 @@ import '../../data/repository/auth_repository_ipml.dart'; // Implementation
 // GIẢ SỬ bạn cũng có provider này (tương tự như firebaseAuthProvider)
 // Nếu chưa có, hãy thêm nó vào file 'firebase_providers.dar
 
-// === SỬA LẠI PROVIDER CỦA BẠN ===
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   // 1. "SỬ DỤNG" (watch) FirebaseAuth
   final firebaseAuth = ref.watch(firebaseAuthProvider);

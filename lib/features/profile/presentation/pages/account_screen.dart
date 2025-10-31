@@ -12,7 +12,9 @@ class AccountScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authControllerProvider).value;
-    final videos = ref.watch(FavoritesvideoListProvider);
+    final userId = user?.id ?? '';
+
+    final videos = ref.watch(FavoritesvideoListProvider(userId));
 
     return SingleChildScrollView(
       child: Center(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/presentation/widget/video_card.dart';
 import '../../presentation/provider/favorites_ui_provider.dart';
+import '../../../auth/presentation/provider/auth_provider.dart';
 
 class FavoriteScreen extends ConsumerStatefulWidget {
   const FavoriteScreen({super.key});
@@ -14,15 +15,15 @@ class _FavoriteScreenState extends ConsumerState<FavoriteScreen> {
   @override
   void initState() {
     super.initState();
-    // Invalidate provider sau khi widget build xong để load lại dữ liệu
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.invalidate(FavoritesvideoListProvider);
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final favoritesAsync = ref.watch(FavoritesvideoListProvider);
+    final currentUser = ref.watch(authControllerProvider).value;
+    final userId = currentUser?.id ?? '';
+    ref.invalidate(FavoritesvideoListProvider(userId));
+
+    final favoritesAsync = ref.watch(FavoritesvideoListProvider(userId));
 
     return Scaffold(
       backgroundColor: Colors.black,

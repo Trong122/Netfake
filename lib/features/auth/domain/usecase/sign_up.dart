@@ -1,6 +1,5 @@
 import '../repositories/auth_repository.dart';
 
-
 class SignUp {
   final AuthRepository _authRepository;
 

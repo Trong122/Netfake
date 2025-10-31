@@ -1,7 +1,7 @@
 import '../entities/favorites_video.dart';
 
 abstract class FavoritesVideoReporitory {
-  Future<List<FavoritesVideo>> getAllFavoritesVideo();
+  Future<List<FavoritesVideo>> getAllFavoritesVideo(String UserId);
   Future<FavoritesVideo?> getFavoritesVideoById(String id);
   Future<void> addFavoritesVideo(FavoritesVideo FavoritesVideo,String id);
   Future<void> deleteFavoritesVideo(String id);

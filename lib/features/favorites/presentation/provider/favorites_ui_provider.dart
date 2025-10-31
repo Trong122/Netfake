@@ -6,15 +6,13 @@ import '../../data/provider/favorites_video_provider_data.dart';
 import '../../../../core/data/firebase_providers.dart';
 
 // Provider để lấy danh sách video từ UseCase (dành cho UI)
-final FavoritesvideoListProvider = FutureProvider<List<FavoritesVideo>>((
-  ref,
-) async {
+final FavoritesvideoListProvider = FutureProvider.family<List<FavoritesVideo>, String>((ref, userId) async {
   final getAllVideos = ref.watch(getAllVideoUsecaseProvider);
-  return await getAllVideos();
+  // Truyền userId vào usecase
+  return await getAllVideos(userId);
 });
 
-final favoritesVideoAddProvider =
-    Provider<Future<void> Function(FavoritesVideo video, String id)>((ref) {
+final favoritesVideoAddProvider =Provider<Future<void> Function(FavoritesVideo video, String id)>((ref) {
       final addVideoUsecase = ref.watch(addVideoUsecaseProvider);
 
       return (FavoritesVideo video, String id) async {
