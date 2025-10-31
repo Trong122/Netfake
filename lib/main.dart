@@ -1,28 +1,13 @@
 import 'package:flutter/material.dart';
-import 'features/home/presentation/pages/main_screen.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // <- thêm
+import 'app.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  await FirebaseAuth.instance.signOut();
 
-void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: const Size(360, 690), // kích thước thiết kế gốc
-      builder: (context, child) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData.dark(), // chủ đề tối
-          home: child, // đây là màn hình chính
-        
-        );
-      },
-      child: const MainScreen(), // màn hình chính của app
-    );
-  }
-}

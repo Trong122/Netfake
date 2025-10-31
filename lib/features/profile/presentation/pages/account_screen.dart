@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:netfake/core/model/videoview_model.dart';
-import '../../../../core/presentation/widget/video_card.dart';
-class AccountScreen extends StatelessWidget {
-  AccountScreen({super.key});
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:netfake/core/presentation/widget/video_card.dart';
+import '../../../auth/presentation/provider/auth_provider.dart';
+import '/core/routing/app_routes.dart';
+import 'package:go_router/go_router.dart';
+import '../../../favorites/presentation/provider/favorites_ui_provider.dart';
 
-  final List<Map<String, String>> moviesNewest = [
-    {"title": "Harry Potter", "poster": "assets/aven1.jpeg","description":"Phim về phù thủy"} ,
-    {"title": "Avengers Endgame", "poster": "assets/aven1.jpeg","description":"Phim về siêu anh hùng"},
-    {"title": "Furiosa", "poster": "assets/aven1.jpeg","description":"Phim về chiến binh"},
-    {"title": "Deadpool", "poster": "assets/aven1.jpeg","description":"Phim về sát thủ"},
-    {"title": "Deadpool 2", "poster": "assets/aven1.jpeg","description":"Phim về sát thủ 2"},
-    {"title": "Deadpool 3", "poster": "assets/aven1.jpeg","description":"Phim về sát thủ 3"},
-  ];
+class AccountScreen extends ConsumerWidget {
+  const AccountScreen({super.key});
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authControllerProvider).value;
+    final videos = ref.watch(FavoritesvideoListProvider);
+
     return SingleChildScrollView(
-       child:Center(
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -28,11 +28,13 @@ class AccountScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Ảnh nền (poster)
+                  // Ảnh nền
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
                     child: Image.asset(
-                      "assets/avengers.jpg", // ảnh poster Batman
+                      "assets/avengers.jpg",
                       height: 120,
                       width: double.infinity,
                       fit: BoxFit.cover,
@@ -47,26 +49,47 @@ class AccountScreen extends StatelessWidget {
                         CircleAvatar(
                           radius: 40,
                           backgroundColor: Colors.white,
-                          backgroundImage: AssetImage(
-                            "assets/avatar.png", // thay bằng ảnh avatar
+                          backgroundImage: const AssetImage(
+                            "assets/avatar.png",
                           ),
                         ),
                         const SizedBox(width: 12),
-                        // Tên + Email
+                        // Tên + Email + nút Admin
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
-                              "Nguyễn Văn A",
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
+                              user?.displayName ?? "No Name",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
-                              "NVA@gmail.com",
-                              style: TextStyle(color: Colors.grey, fontSize: 14),
+                              user?.email ?? "No Email",
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ElevatedButton(
+                              onPressed: () {
+                                if (user != null && user.role == 'admin') {
+                                  context.go(AppRoutes.admin);
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Bạn không có quyền truy cập Admin",
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: const Text("Admin"),
                             ),
                           ],
                         ),
@@ -79,85 +102,59 @@ class AccountScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // Hàng thống kê
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _StatCard(title: "Số phim đã xem", value: "100"),
-                const SizedBox(width: 12),
-                _StatCard(title: "Thời gian xem", value: "24m30d23h"),
-              ],
-            ),
-            Row(children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child:Text("Yêu thích",
-                style:TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),),
+            // Tiêu đề danh sách yêu thích
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Video yêu thích",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ],
             ),
-            SizedBox(
-              height: 200,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                physics: ClampingScrollPhysics(),
-                itemCount: moviesNewest.length,
-                itemBuilder: (context, index) {
-                  final movie = moviesNewest[index];
-                  return Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: VideoCard(
-                    video:VideoModel(title: movie["title"]??"no title", 
-                    imageUrl: movie["poster"]??"assets/aven1.jpeg", 
-                    description: movie["description"]??"no description",
+            videos.when(
+              data: (videoList) {
+                if (videoList.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                      "Chưa có video yêu thích!",
+                      style: TextStyle(color: Colors.grey),
                     ),
+                  );
+                }
+                return SizedBox(
+                  height: 200,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: videoList.length,
+                    itemBuilder: (context, index) {
+                      final favideo = videoList[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: VideoCard(video: favideo.video),
+                      );
+                    },
                   ),
                 );
-                },
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  "Lỗi: $err",
+                  style: const TextStyle(color: Colors.red),
+                ),
               ),
-            )
+            ),
           ],
         ),
       ),
     );
-  }
-}
-
-// Widget cho card thống kê
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  const _StatCard({required this.title, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 140,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[900],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: const TextStyle(
-                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.grey, fontSize: 13),
-          ),
-        ],
-      ),
-    );
-
   }
 }

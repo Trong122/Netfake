@@ -1,4 +1,4 @@
-import '../entities/video_entity.dart';
+import '../entities/video.dart';
 import '../repositories/video_repository.dart';
 
 class UpdateVideo {
@@ -6,6 +6,7 @@ class UpdateVideo {
 
   UpdateVideo(this.repository);
 
-  
-  Future<VideoEntity> call(VideoEntity) => repository.updateVideo(VideoEntity);
+  Future<void> call(Video video) async {
+    await repository.updateVideo(video);
+  }
 }

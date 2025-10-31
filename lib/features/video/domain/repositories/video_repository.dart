@@ -1,9 +1,10 @@
-import '../entities/video_entity.dart';
+import '../entities/video.dart';
 
 abstract class VideoReporitory {
-  Future<List<VideoEntity>> fetchVideos({int page = 1, int limit = 10});
-  Future<VideoEntity> getVideoById(String id);
-  Future<VideoEntity> uploadVideo(VideoEntity video);
+  Future<List<Video>> getAllVideo();
+  Future<Video> getVideoById(String id);
+  Future<void> uploadVideo(Video video);
   Future<void> deleteVideo(String id);
-  Future<VideoEntity> updateVideo(VideoEntity video);
+  Future<void> updateVideo(Video video);
+  Future<List<Video>> searchVideo(String title);
 }

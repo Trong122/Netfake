@@ -1,53 +1,52 @@
 import 'package:flutter/material.dart';
-import 'package:netfake/features/video/domain/entities/video_entity.dart';
-import '../../../features/Screens/video_detail_screen.dart';
-import '../../../features/video/domain/entities/video_entity.dart';
-import '../../model/videoview_model.dart';
-
+import 'package:netfake/features/video/domain/entities/video.dart';
+import 'package:go_router/go_router.dart';
+import '/core/routing/app_routes.dart';
 class VideoCard extends StatelessWidget {
-final VideoModel video;
-  final VoidCallback? onTap; // để click mở chi tiết
+  final Video video;
+  final VoidCallback? onTap; 
 
-  const VideoCard({
-    Key? key,
-    required this.video,
-    this.onTap,
-  }) : super(key: key);
+  const VideoCard({Key? key, required this.video, this.onTap})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 120,
+      width: 120, // Giới hạn chiều rộng
       child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => VideoDetailScreen(
-                title: video.title,
-                imageUrl: video.imageUrl ?? "assets/aven1.jpeg",
-                description: video.description ?? "no description",
-              ),
-            ),
-          );
+        onTap: (){
+          context.push(AppRoutes.detail,extra: video,);
         },
+        borderRadius: BorderRadius.circular(8), // Cho hiệu ứng nhấn đẹp hơn
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min, // Giúp Column ôm sát nội dung
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                video.imageUrl ?? "assets/aven1.jpeg",
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: 150,
+            Container(
+              width: double.infinity, 
+              height: 150,           
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8), // Bo góc ở đây
+                image: DecorationImage(
+                  // Dùng DecorationImage nhanh hơn
+                  image: AssetImage(video.imageUrl ), // Giữ fallback
+                  fit: BoxFit.cover, 
+                ),
               ),
             ),
-            const SizedBox(height: 5),
+            // --------------- HẾT PHẦN SỬA ẢNH ---------------
+
+            const SizedBox(height: 5), // Khoảng cách
+
+            // Tiêu đề video
             Text(
               video.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white),
+              maxLines: 1, 
+              overflow: TextOverflow.ellipsis, 
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14 
+              ),
             ),
           ],
         ),

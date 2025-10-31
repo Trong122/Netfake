@@ -1,19 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:netfake/core/presentation/widget/video_card.dart';
-import 'package:netfake/core/model/videoview_model.dart';
+import '../../presentation/provider/search_provider.dart'; // provider search video
 
-class SearchScreen extends StatelessWidget {
-  final List<Map<String, String>> moviesHost = [
-    {"title": "Harry Potter", "poster": "assets/aven1.jpeg","description":"Phim về phù thủy"} ,
-    {"title": "Avengers Endgame", "poster": "assets/aven1.jpeg","description":"Phim về siêu anh hùng"},
-    {"title": "Furiosa", "poster": "assets/aven1.jpeg","description":"Phim về chiến binh"},
-    {"title": "Deadpool", "poster": "assets/aven1.jpeg","description":"Phim về sát thủ"},
-    {"title": "Deadpool 2", "poster": "assets/aven1.jpeg","description":"Phim về sát thủ 2"},
-    {"title": "Deadpool 3", "poster": "assets/aven1.jpeg","description":"Phim về sát thủ 3"},
-  ];
-  SearchScreen({super.key});
+class SearchScreen extends ConsumerStatefulWidget {
+  const SearchScreen({super.key});
+
+  @override
+  ConsumerState<SearchScreen> createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends ConsumerState<SearchScreen> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {}); // rebuild khi gõ
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final query = _searchController.text.trim();
+
+    // Lấy searchResult theo query từ FutureProvider.family
+    final searchResult = ref.watch(searchVideoProvider(query));
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -30,91 +50,53 @@ class SearchScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
           ),
           child: TextField(
+            controller: _searchController,
             style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Nhập tên phim ...',
-              hintStyle: const TextStyle(color: Colors.grey),
-              prefixIcon: const Icon(Icons.search, color: Colors.white),
+              hintStyle: TextStyle(color: Colors.grey),
+              prefixIcon: Icon(Icons.search, color: Colors.white),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.only(top: 8),
+              contentPadding: EdgeInsets.only(top: 8),
             ),
           ),
         ),
       ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Phim hot',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: moviesHost.map((movie) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 6),
-                  VideoCard(
-                    video:VideoModel(title: movie["title"]??"no title", 
-                    imageUrl: movie["poster"]??"assets/aven1.jpeg", 
-                    description: movie["description"]??"no description",
-                    ),
-                  ),
-                  ],
+        child: searchResult.when(
+          data: (videos) {
+            if (query.isEmpty) {
+              return const Center(
+                child: Text(
+                  'Nhập tên phim để tìm kiếm',
+                  style: TextStyle(color: Colors.grey),
                 ),
               );
-            }).toList(),
+            }
+            if (videos.isEmpty) {
+              return const Center(
+                child: Text(
+                  'Không tìm thấy phim nào 😢',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              );
+            }
+            return SingleChildScrollView(
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: videos.map((video) => VideoCard(video: video)).toList(),
+              ),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, st) => Center(
+            child: Text(
+              'Lỗi: $err',
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
-        ),
-            const SizedBox(height: 24),
-            const Text(
-              'Đề xuất',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 200,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                shrinkWrap: true, // thêm dòng này
-                physics: const BouncingScrollPhysics(), // cho smooth scroll ngang
-                itemCount: moviesHost.length,
-                itemBuilder: (context, index) {
-                  final movie = moviesHost[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 6),
-                        VideoCard(
-                          video:VideoModel(title: movie["title"]??"no title", 
-                          imageUrl: movie["poster"]??"assets/aven1.jpeg", 
-                          description: movie["description"]??"no description",
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
         ),
       ),
     );
