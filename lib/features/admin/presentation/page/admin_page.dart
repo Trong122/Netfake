@@ -7,13 +7,12 @@ import '../provider/admin_provdier.dart';
 import 'add_video_page.dart';
 import '../../../../core/routing/app_routes.dart';
 import 'package:go_router/go_router.dart';
-
 class AdminScreen extends ConsumerWidget {
   const AdminScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Lấy danh sách video từ provider
+    ref.invalidate(videoListProvider);
     final videoAsync = ref.watch(videoListProvider);
     final deleteVideo = ref.read(deleteVideoUsecaseProvider);
 
@@ -88,7 +87,7 @@ class AdminScreen extends ConsumerWidget {
                                 },
                               ),
                               IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
+                                icon: const Icon(Icons.delete),
                                 onPressed: () async {
                                   await deleteVideo(video.id);
                                   ref.invalidate(videoListProvider);
@@ -134,12 +133,8 @@ class AdminScreen extends ConsumerWidget {
 }
 
 Future<void> openForm(BuildContext context, WidgetRef ref, {Video? video}) async {
-  final result = await Navigator.push(
+  await Navigator.push(
     context,
     MaterialPageRoute(builder: (_) => AddMovieScreen(video: video)),
   );
-
-  if (result == true) {
-    ref.invalidate(videoListProvider); // reload danh sách video
-  }
 }

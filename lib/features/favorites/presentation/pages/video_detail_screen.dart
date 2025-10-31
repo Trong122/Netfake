@@ -71,8 +71,6 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
         isFavorite = !isFavorite!;
       });
 
-      // Cập nhật danh sách favorites
-      ref.invalidate(FavoritesvideoListProvider);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
